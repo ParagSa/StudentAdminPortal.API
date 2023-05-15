@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Update.Internal;
 using DataModels= StudentAdminPortal.API.DataModels;
 using StudentAdminPortal.API.DomainModels;
 using StudentAdminPortal.API.Repositories;
+using StudentAdminPortal.API.DataModels;
 
 namespace StudentAdminPortal.API.Controllers
 {
@@ -28,7 +29,7 @@ namespace StudentAdminPortal.API.Controllers
 
           
             
-            return Ok(mapper.Map<List<Student>>(students));
+            return Ok(mapper.Map<List<DomainModels.Student>>(students));
         }
         [HttpGet]
         [Route("[controller]/{studentId:guid}")]
@@ -43,7 +44,7 @@ namespace StudentAdminPortal.API.Controllers
 
 
 
-            return Ok(mapper.Map<Student>(students));
+            return Ok(mapper.Map<DomainModels.Student>(students));
         }
         [HttpPut]
         [Route("[controller]/{studentId:guid}")]
@@ -66,6 +67,26 @@ namespace StudentAdminPortal.API.Controllers
 
             return null;
         }
+
+
+        [HttpDelete]
+        [Route("[controller]/{studentId:guid}")]
+        public async Task<IActionResult> DeleteStudentAsync([FromRoute] Guid studentId)
+        {
+           
+            if (await studentRepo.Exist(studentId))
+            {
+                var student = await studentRepo.DeleteStudentAsync(studentId);
+                return Ok(mapper.Map<DomainModels.Student>(student));
+
+            }
+
+            return NotFound();
+
+            //return Ok(mapper.Map<Student>(students));
+        }
+
+
 
     }
 }
