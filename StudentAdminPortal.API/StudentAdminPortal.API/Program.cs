@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using StudentAdminPortal.API.DataModels;
 using StudentAdminPortal.API.Repositories;
 
@@ -19,6 +20,14 @@ namespace StudentAdminPortal.API
 
             builder.Services.AddScoped<IStudentRepo, StudentRepo>();
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
+            builder.Services.AddCors((Options) =>
+            {
+                Options.AddPolicy("angularApplication", (builder) =>
+                {
+                    builder.WithOrigins("http://localhost:4200").AllowAnyHeader().WithMethods("GET", "POST", "PUT", "DELETE").
+                    WithExposedHeaders("*");
+                });
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -32,6 +41,8 @@ namespace StudentAdminPortal.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("angularApplication");
 
             app.UseHttpsRedirection();
 
