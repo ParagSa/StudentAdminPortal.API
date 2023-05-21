@@ -12,6 +12,14 @@ namespace StudentAdminPortal.API.Repositories
             this.dbContext = dbContext;
         }
 
+        public async Task<Student> AddStudent(Student request)
+        {
+          var student= await dbContext.Students.AddAsync(request);
+           await dbContext.SaveChangesAsync();
+            return student.Entity;
+            
+        }
+
         public async Task<Student> DeleteStudentAsync(Guid StudentId)
         {
             var student = await GetStudentByIdAsync(StudentId);
