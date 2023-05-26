@@ -14,11 +14,14 @@ namespace StudentAdminPortal.API.Controllers
     {
         private readonly IStudentRepo studentRepo;
         private readonly IMapper mapper;
+        private readonly IImageRepo imageRepo;
 
-        public StudentsController(IStudentRepo studentRepo, IMapper mapper)
+        public StudentsController(IStudentRepo studentRepo, IMapper mapper,
+            IImageRepo imageRepo)
         {
             this.studentRepo = studentRepo;
             this.mapper = mapper;
+            this.imageRepo = imageRepo;
         }
 
         [HttpGet]
@@ -94,6 +97,50 @@ namespace StudentAdminPortal.API.Controllers
             return CreatedAtAction(nameof(GetSingleStudentAsync),new {studentId= student.Id},
                 mapper.Map<DomainModels.Student>(student));
 
+        }
+
+        [HttpPost]
+        [Route("[controller]/{studentId:guid}/upload-image")]
+
+        public async Task<IActionResult> UploadImage([FromRoute] Guid studentId, IFormFile
+             profileImage) 
+        {
+            var validExtensions = new List<String> {
+            
+                ".jpeg",
+                ".png",
+                ".jpg"
+             
+
+            };
+            if (profileImage != null && profileImage.Length>0)
+            {
+                var extension = Path.GetExtension(profileImage.FileName);
+                if (validExtensions.Contains(extension))
+                {
+                    if (await studentRepo.Exist(studentId))
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName
+                            );
+                        var fileImagePath = await imageRepo.Upload(profileImage, fileName);
+
+                        if (await studentRepo.UpdateProfileImage(studentId, fileImagePath))
+                        {
+                            return Ok(fileImagePath);
+                        }
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Error uploading image");
+
+                    }
+
+
+                }
+                return BadRequest("This is not valid image format");
+
+            }
+           
+            return NotFound();
+        
         }
 
 
